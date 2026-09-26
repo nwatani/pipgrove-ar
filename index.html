@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>بيبغروف — فقّس · ربِّ · امزج · صادِق</title>
+<link rel="manifest" href="manifest-ar.webmanifest">
+<meta name="theme-color" content="#3E9E5C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="بيبغروف">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='112' fill='%233E9E5C'/><ellipse cx='256' cy='292' rx='118' ry='148' fill='%23FFF7E4'/><circle cx='218' cy='240' r='17' fill='%238BC48A'/><circle cx='298' cy='290' r='13' fill='%238BC48A'/><circle cx='238' cy='348' r='15' fill='%238BC48A'/><path d='M256 120c28-42 72-48 98-42-6 36-36 64-80 64z' fill='%2363C584'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -2168,7 +2175,7 @@ const UI={
   },
   bagPanel(){ const body=el('div');
    const grid=el('div','grid3'); let any=false;
-   Object.keys(G.inv).forEach(k=>{ if(!G.inv[k])return; any=true; const F=FOODS[k];
+   Object.keys(G.inv).forEach(k=>{ if(!G.inv[k]||!FOODS[k])return; any=true; const F=FOODS[k];
      const card=el('div','card'); card.style.cursor='default';
      card.innerHTML='<div style="width:40px;height:40px;border-radius:50%;background:'+F.c+';border:3px solid #6B4A2F;box-shadow:inset 0 -7px 0 rgba(0,0,0,.15)"></div>'+
        '<div class="nm">'+F.n+'</div><div class="sub">×'+G.inv[k]+(F.el?' · '+EL[F.el].n:'')+'</div>';
@@ -3535,6 +3542,10 @@ AudioSys.setVol(G.settings.vol); AudioSys.setMute(G.settings.muted);
 showTitle(); UI.hud(); UI.logBadge(); G.dayT=1.25;
 addEventListener('beforeunload',()=>{ if(G.started)SaveSys.store(G); });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden&&G.started)SaveSys.store(G); });
+/* PWA: تسجيل عامل الخدمة عند الاستضافة (مثل GitHub Pages) */
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
 requestAnimationFrame(loop);
 </script>
 </body>
