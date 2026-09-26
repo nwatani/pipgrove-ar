@@ -1,0 +1,28 @@
+{
+  "name": "بيبغروف — مزرعة الكائنات",
+  "short_name": "بيبغروف",
+  "description": "مغامرة دافئة لجمع الكائنات. فقّس وربِّ وامزج وصادِق بيبات لطيفة، ابنِ دارك وعِش حكاية الحارس.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#274d33",
+  "theme_color": "#3E9E5C",
+  "dir": "rtl",
+  "lang": "ar",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='112' fill='%233E9E5C'/><ellipse cx='256' cy='292' rx='118' ry='148' fill='%23FFF7E4'/><circle cx='218' cy='240' r='17' fill='%238BC48A'/><circle cx='298' cy='290' r='13' fill='%238BC48A'/><circle cx='238' cy='348' r='15' fill='%238BC48A'/><path d='M256 120c28-42 72-48 98-42-6 36-36 64-80 64z' fill='%2363C584'/></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='112' fill='%233E9E5C'/><ellipse cx='256' cy='292' rx='118' ry='148' fill='%23FFF7E4'/><circle cx='218' cy='240' r='17' fill='%238BC48A'/><circle cx='298' cy='290' r='13' fill='%238BC48A'/><circle cx='238' cy='348' r='15' fill='%238BC48A'/><path d='M256 120c28-42 72-48 98-42-6 36-36 64-80 64z' fill='%2363C584'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
