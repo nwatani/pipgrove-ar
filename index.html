@@ -292,14 +292,17 @@ input[type=range]{width:100%;accent-color:var(--leaf)}
 @media (max-width:640px){
   .panel{width:100vw;max-height:86vh;top:auto;bottom:0;left:0;transform:none;border-radius:22px 22px 0 0;border-bottom:none;animation:sheetUp .3s cubic-bezier(.2,1.2,.4,1)}
   @keyframes sheetUp{from{transform:translateY(40px);opacity:0}}
-  .dockBtn{width:60px;font-size:11px}
+  .dockBtn{width:52px;font-size:9.5px}
+  .dockBtn svg{width:19px;height:19px}
   #objChip{font-size:12px;padding:5px 12px}
   #hudChips .chip{font-size:12px;padding:2px 9px}
 }
 /* الهواتف الصغيرة: لا نخفي أي زر من الشريط — يلتف إلى صفين بدل أن يختفي بالتمرير */
+/* الهواتف الصغيرة: صف واحد مضغوط — أيقونات أصغر وكل شيء ظاهر */
 @media (max-width:460px){
-  #dock{flex-wrap:wrap;justify-content:center;max-width:min(96vw,340px);gap:6px}
-  .dockBtn{width:62px;font-size:10.5px}
+  #dock{flex-wrap:nowrap;justify-content:center;max-width:99vw;gap:4px;padding:6px 5px}
+  .dockBtn{width:clamp(38px,12vw,58px);font-size:8.5px;padding:5px 1px 4px;border-radius:11px}
+  .dockBtn svg{width:17px;height:17px}
 }
 @media (pointer:coarse){ #joy{display:block} }
 </style>
