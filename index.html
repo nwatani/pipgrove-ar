@@ -1054,6 +1054,7 @@ function particles(x,y,kind,n,col){ if(!G.settings.particles)return;
   for(let i=0;i<(n||10);i++){ const a=rand(0,6.28),sp=rand(30,110);
     G.particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-50,life:rand(.5,1.1),max:1.1,kind:kind||'spark',col:col||pick(['#FFC53D','#FF7096','#63C584','#4FC3E8','#FFF6CE']),sz:rand(3,6),rot:rand(0,6)});}
   if(G.particles.length>320)G.particles.splice(0,G.particles.length-320); }
+let touchUI=false; // true على أجهزة اللمس — يفعّل نصب الفخ من زر الفعل
 const Input={keys:{},joy:{x:0,y:0},joyOn:false,joyId:null,
  init(){
   addEventListener('keydown',e=>{
@@ -1061,6 +1062,7 @@ const Input={keys:{},joy:{x:0,y:0},joyOn:false,joyId:null,
     this.keys[e.key.toLowerCase()]=true;
     if(e.repeat)return;
     if(e.key.toLowerCase()==='e'&&G.started)tryInteract();
+    if(e.key.toLowerCase()==='t'&&G.started)trySetTrap(); // زر مخصص للفخ — لا يتعارض مع E
     if(e.key==='Escape')UI.closeTop();
   });
   addEventListener('keyup',e=>this.keys[e.key.toLowerCase()]=false);
@@ -1082,8 +1084,8 @@ const Input={keys:{},joy:{x:0,y:0},joyOn:false,joyId:null,
     if(Math.hypot(dx,dy)<40)return;
     this.tapMove={x:dx/Math.hypot(dx,dy),y:dy/Math.hypot(dx,dy),t:.35};
   });
-  if(matchMedia('(pointer:coarse)').matches)document.body.classList.add('touch');
-  addEventListener('touchstart',()=>document.body.classList.add('touch'),{once:true});
+  if(matchMedia('(pointer:coarse)').matches){document.body.classList.add('touch');touchUI=true;}
+  addEventListener('touchstart',()=>{document.body.classList.add('touch');touchUI=true;},{once:true});
   const ab=$('actBtn');
   ab.addEventListener('pointerdown',e=>{ e.preventDefault(); if(G.started)tryInteract(); });
   ab.addEventListener('click',e=>{ e.preventDefault(); });
@@ -1812,8 +1814,8 @@ function findInteract(){
         G.stats.clearHint=1;
         toast('ذاك يسد الطريق. تبويب العتاد في البسطة يبيع أدوات لإزالة الأشجار والصخور وبلورات الجليد والأزهار والفطر.','good',5600);
         break; } } }
-  if(!best){ const bio=World.biomeAt(P.x,P.y);
-    if(bio!=='ranch')best={x:P.x,y:P.y,label:'انصب فخًا',fn:trySetTrap,sub:G.trapCount+' فخ متبقٍ · يحتاج طعم'}; }
+  if(!best&&touchUI){ const bio=World.biomeAt(P.x,P.y);
+    if(bio!=='ranch')best={x:P.x,y:P.y,label:'انصب فخًا',fn:trySetTrap,sub:G.trapCount+' فخ متبقٍ · أو اضغط T'}; }
   return best;
 }
 const UI={
@@ -2401,6 +2403,7 @@ const UI={
   helpPanel(){ const body=el('div');
    body.innerHTML='<div class="kv"><span>الحركة</span><span>WASD / الأسهم / العصا / السحب</span></div>'+
    '<div class="kv"><span>التفاعل</span><span>زر E أو الزر الذهبي الكبير</span></div>'+
+   '<div class="kv"><span>نصب الفخ</span><span>زر T (على اللمس: الزر الذهبي في البرية المفتوحة)</span></div>'+
    '<div class="kv"><span>إغلاق اللوحات</span><span>Esc أو ×</span></div>'+
    '<div class="hint">الحلقة: استكشف → اجمع الوجبات والبيض → فقّس البيبات → أطعمها وداعبها → امزج البالغين عند الينبوع → طابِق البيبات مع الرحّالة → اكسب العملات → افتح أراضٍ جديدة. البيبات المتلألئة (المرحلة 4) تنسج بيض القزح!</div>'+
    '<div class="hint"><b>ملء الزريبة:</b> 1) فقّس البيض في الحاضنة. 2) <b>شبكة النجوم</b> — أثر مدفون في مكان ما بأقصى زوايا صخور الجمر. اعثر عليها ثم اقترب من بيبات البر البرية وارمِ الشبكة لإمساكها فورًا (البيبات الأندر أصعب إمساكًا). 3) <b>الفخاخ</b>: انصب واحدًا بطعم وعد لاحقًا. 4) <b>الصيد</b> لبيبات الماء بصنارة القارب. بيبات الماء لا تُمسك بالشبكة أبدًا — بالصيد فقط.</div>'+
@@ -3517,7 +3520,7 @@ const DevSys={ active:false,backup:null,isOpen:false,
    if(!document.getElementById('devBg')){
      const bg=el('div'); bg.id='devBg'; bg.addEventListener('click',()=>DevSys.closePanel());
      const p=el('div','panel'); p.id='devPanel';
-     p.innerHTML='<div class="panelHead"><h2 class="disp">وحدة البستان<span class="sub">أدوات بناء داخلية · Ctrl+Alt+G</span></h2><button class="xBtn" data-act="devclose">×</button></div>'+
+     p.innerHTML='<div class="panelHead"><h2 class="disp">وحدة البستان<span class="sub">أدوات بناء داخلية · Ctrl+Alt+G · أو 5 نقرات على سطر الإصدار</span></h2><button class="xBtn" data-act="devclose">×</button></div>'+
       '<div class="panelBody">'+
       '<div id="devStatus" class="hint">'+this.defaultStatus()+'</div>'+
       '<div style="display:flex;gap:8px;margin:12px 0;align-items:stretch">'+
@@ -3562,6 +3565,9 @@ World.gen(); World.bakeGround(); initAtmo();
   G.wildPips.push({sp,x:pt[0]*TILE,y:pt[1]*TILE,tx:pt[0]*TILE,ty:pt[1]*TILE,area:'meadow',t:rand(0,9),wt:0,flip:false}); });
 Input.init();
 DevSys.init();
+// مدخل لمس مخفي للوحدة: خمس نقرات سريعة على سطر الإصدار (الشاشة الأولى) أو شريحة المستوى (داخل اللعبة)
+(function(){let n=0,t0=0;const bump=()=>{const now=Date.now();if(now-t0>2500)n=0;t0=now;if(++n>=5){n=0;DevSys.openPanel();}};
+ ['titleFoot','repChip'].forEach(id=>{const e=$(id);if(e)e.addEventListener('click',bump);});})();
 $('saveFile').addEventListener('change',e=>{
   const f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f)return;
   const r=new FileReader();
