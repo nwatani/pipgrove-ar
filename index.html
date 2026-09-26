@@ -559,8 +559,8 @@ const REQ_FLAVOR_MEAL=[
 const SELL_PRICES={pellet:4,sunberry:9,pondplum:9,emberfruit:9,boltnut:11,stonenut:11,frostfig:11,gloomcap:13};
 const TOOLS={
  saw:{n:'منشار الحارس',d:'يقطع الأشجار التي تسد دروبك. يعطي عملات وأحيانًا جوز برق.',cost:80,mat:{boltnut:4}},
- wedge:{n:'إسفين الفلق',d:'يفلق الصخور ويفتح الطريق. أحيانًا تختبئ داخلها شظية بلور.',cost:80,mat:{stonenut:4}},
- shears:{n:'مقصّ التقليم',d:'يقصّ الأزهار والشجيرات ويرتّب أي مدخل مسدود.',cost:50,mat:{sunberry:4}},
+ wedge:{n:'إسفين الفلق',d:'يفلق الصخور وبلورات الجليد. أحيانًا تختبئ داخلها شظية بلور.',cost:80,mat:{stonenut:4}},
+ shears:{n:'مقصّ التقليم',d:'يقصّ الأزهار والشجيرات والفطر ويرتّب أي مدخل مسدود.',cost:50,mat:{sunberry:4}},
 };
 /* ═══ مغامرات الأراضي — لكل أرض مفتوحة غاية ═══ */
 const WOOD={n:'خشب',c:'#A9793F'};
@@ -688,6 +688,7 @@ const SaveSys={
      gear:G.gear, trapCount:G.trapCount, traps:G.traps, tools:G.tools,
      boat:G.boat,golem:G.golem,golemWant:G.golemWant,golemDone:G.golemDone,ice:G.ice,iceDone:G.iceDone,lanterns:G.lanterns,
      hasNet:G.hasNet,ring:G.ring,vehicle:G.vehicle,mounted:G.mounted,swing:G.swing,veh:G.veh||{},
+     clearedDecor:G.clearedDecor||[],
      story:G.story,home:G.home,npcs:G.npcs,farm:G.farm,market:G.market,kitchen:G.kitchen,meals:G.meals};
    localStorage.setItem(SAVE_KEY,JSON.stringify(data)); return true; }catch(e){ return false; } },
  load(){ if(!this.available())return null;
@@ -702,6 +703,7 @@ const SaveSys={
      log:G.log.slice(-80),logRead:G.logRead,gear:G.gear,trapCount:G.trapCount,traps:G.traps,tools:G.tools,
      boat:G.boat,golem:G.golem,golemWant:G.golemWant,golemDone:G.golemDone,ice:G.ice,iceDone:G.iceDone,lanterns:G.lanterns,
      hasNet:G.hasNet,ring:G.ring,vehicle:G.vehicle,mounted:G.mounted,swing:G.swing,veh:G.veh||{},
+     clearedDecor:G.clearedDecor||[],
      story:G.story,home:G.home,npcs:G.npcs,farm:G.farm,market:G.market,kitchen:G.kitchen,meals:G.meals}}; },
  download(G){ try{ const blob=new Blob([JSON.stringify(this.payload(G),null,1)],{type:'application/json'});
    const url=URL.createObjectURL(blob); const a=document.createElement('a');
@@ -718,6 +720,9 @@ const World={
  solid:null, tiles:null, ground:null, fence:[], gates:{}, decor:[], nodes:[], spawnPts:{}, water:[],
  penRect:null, buildings:[], lamps:[], flowers:[], structs:[],
  gen(){
+   // RNG ببذرة ثابتة ليكون تخطيط العالم مطابقًا في كل تحميل — الطرق المُنظّفة تبقى نظيفة
+   const wrng=(s=>()=> (s=(s*16807)%2147483647)/2147483647)(987654);
+   const wrandi=(a,b)=>a+Math.floor(wrng()*(b-a+1));
    this.solid=new Uint8Array(MAP_W*MAP_H); this.tiles=new Uint8Array(MAP_W*MAP_H);
    const set=(x,y,v)=>{if(x>=0&&y>=0&&x<MAP_W&&y<MAP_H)this.tiles[y*MAP_W+x]=v;};
    const solid=(x,y)=>{if(x>=0&&y>=0&&x<MAP_W&&y<MAP_H)this.solid[y*MAP_W+x]=1;};
@@ -769,12 +774,12 @@ const World={
    ];
    const tryDecor=(kind,tiles,n)=>{let tries=0,placed=0;
      while(placed<n&&tries<900){tries++;
-       const x=randi(2,MAP_W-3),y=randi(2,MAP_H-3);
+       const x=wrandi(2,MAP_W-3),y=wrandi(2,MAP_H-3);
        if(!tiles.includes(this.tiles[y*MAP_W+x]))continue;
        if(this.solid[y*MAP_W+x])continue;
        if(dist2(x*TILE,y*TILE,32*TILE,25*TILE)<(7*TILE)*(7*TILE))continue;
        if(inCorr(x,y)||[this.tiles[(y-1)*MAP_W+x],this.tiles[(y+1)*MAP_W+x]].includes(7))continue;
-       this.decor.push({kind,x:x*TILE+18,y:y*TILE+20,r:kind==='tree'?15:12,sway:rand(0,6)});
+       this.decor.push({kind,x:x*TILE+18,y:y*TILE+20,r:kind==='tree'?15:12,sway:wrng()*6});
        solid(x,y); placed++;
      }};
    tryDecor('tree',[1,6],24); tryDecor('bushD',[1],7); tryDecor('rock',[4,1],10); tryDecor('spike',[5],8); tryDecor('shroom',[6],8); tryDecor('flower',[1,2],30);
@@ -856,7 +861,7 @@ const World={
      g.fillStyle='#C99A5F'; g.fillRect(f.x*TILE+2,f.y*TILE+11,32,6); g.fillRect(f.x*TILE+2,f.y*TILE+21,32,6);
    });
    this.decor.forEach(d=>{
-     if(d.kind==='rock'||d.kind==='flower'||d.kind==='bushD')return; // تُرسم حيًّا لتزيلها الأدوات
+     if(d.kind==='rock'||d.kind==='flower'||d.kind==='bushD'||d.kind==='spike'||d.kind==='shroom')return; // تُرسم حيًّا لتزيلها الأدوات
      g.save(); g.translate(d.x,d.y);
      if(d.kind==='spike'){ g.fillStyle='rgba(0,0,0,.1)';g.beginPath();g.ellipse(0,10,12,4,0,0,7);g.fill();
        g.fillStyle='#DFF4FA';g.beginPath();g.moveTo(-10,10);g.lineTo(-3,-16);g.lineTo(3,10);g.closePath();g.fill();
@@ -996,8 +1001,8 @@ const G={
  tools:{saw:false,wedge:false,shears:false},
  boat:false, boatX:0, boatY:0, golem:0, golemWant:null, golemDone:false, ice:0, iceDone:false, lanterns:false, simon:null,
  kbuff:null, hasNet:false, netThrow:null, netHint:0,
- ring:false, vehicle:null, mounted:false, swing:false,
- story:{done:[]}, home:0, npcs:{rosa:0,son:0,daughter:0}, npcList:[],
+   ring:false, vehicle:null, mounted:false, swing:false, clearedDecor:[],
+   story:{done:[]}, home:0, npcs:{rosa:0,son:0,daughter:0}, npcList:[],
  farm:{plots:[null,null,null,null,null,null],harvests:0,open:false,giftT:0},
  market:{built:false,sold:0}, kitchen:{built:false}, meals:{},
  settings:{vol:.6,muted:false,ambient:false,particles:true},
@@ -1699,25 +1704,31 @@ function talkNpc(n){
   if(n.kind==='daughter'&&G.kitchen.built&&UI.current!=='kitchen')UI.later('kitchen',450);
 }
 function clearDecor(d){
-  const tool=d.kind==='tree'?'saw':d.kind==='rock'?'wedge':'shears';
+  const tool=d.kind==='tree'?'saw':(d.kind==='rock'||d.kind==='spike')?'wedge':'shears';
   if(!G.tools[tool]){ toast('تحتاج '+TOOLS[tool].n+' لذلك — اصنعه من البسطة (تبويب العتاد).','warn'); AudioSys.deny(); return; }
   const i=World.decor.indexOf(d); if(i<0)return;
   World.decor.splice(i,1);
   const tx=Math.floor(d.x/TILE), ty=Math.floor(d.y/TILE);
   if(tx>=0&&ty>=0&&tx<MAP_W&&ty<MAP_H)World.solid[ty*MAP_W+tx]=0;
+  G.clearedDecor=G.clearedDecor||[]; const ck=tx+','+ty;
+  if(!G.clearedDecor.includes(ck))G.clearedDecor.push(ck);
   G.stats.cleared=(G.stats.cleared||0)+1;
-  let extra='', col=d.kind==='rock'?'#C4B4A2':d.kind==='tree'?'#5FA845':'#FF7096';
+  let extra='', col=d.kind==='rock'?'#C4B4A2':d.kind==='tree'?'#5FA845':d.kind==='spike'?'#BFE9F5':d.kind==='shroom'?'#9B6BD6':'#FF7096';
   if(d.kind==='tree'){ G.coins+=6; Helpers.addItem('wood',1);
     if(chance(.5)){Helpers.addItem('boltnut',1); extra=' +1 خشب +1 جوز برق';} else extra=' +1 خشب';
     logEvent('قطع شجرة بالمنشار — أعطت خشبًا.'); }
   else if(d.kind==='rock'){ G.coins+=6; if(chance(.3)){G.shards++; extra=' +1 شظية بلور';}
     logEvent('فلق صخرة بالإسفين'+(extra?' — '+extra.slice(3)+' في الداخل!':'. انفتح الطريق.')); }
+  else if(d.kind==='spike'){ G.coins+=4; if(chance(.3)){G.shards++; extra=' +1 شظية بلور';}
+    logEvent('فلق بلورة جليد بالإسفين'+(extra?' — '+extra.slice(3)+' لمعت في الداخل!':'.')); }
+  else if(d.kind==='shroom'){ G.coins+=3; if(chance(.4)){Helpers.addItem('gloomcap',1); extra=' +1 فطر الغسق';}
+    logEvent('قصّ فطر غسق متوهجًا للسلة.'); }
   else if(d.kind==='bushD'){ G.coins+=3; if(chance(.4)){Helpers.addItem('sunberry',1); extra=' +1 توت شمس';}
     logEvent('قلّم شجيرة — كان توت ناضج يختبئ داخلها.'); }
   else { G.coins+=2; logEvent('قلّم أزهارًا ورتّب الدرب.'); }
-  AudioSys.gather(); particles(d.x,d.y,d.kind==='rock'?'spark':'leaf',12,col);
-  const cn=d.kind==='flower'?2:d.kind==='bushD'?3:6;
-  toast((d.kind==='tree'?'هوى!':d.kind==='rock'?'طَق!':'قص!')+' انفتح الطريق. +'+cn+' عملات'+extra,'good');
+  AudioSys.gather(); particles(d.x,d.y,(d.kind==='rock'||d.kind==='spike')?'spark':'leaf',12,col);
+  const cn={flower:2,bushD:3,spike:4,shroom:3}[d.kind]||6;
+  toast((d.kind==='tree'?'هوى!':(d.kind==='rock'||d.kind==='spike')?'طَق!':'قص!')+' انفتح الطريق. +'+cn+' عملات'+extra,'good');
   UI.hud(); checkMissions();
 }
 function tryInteract(){ if(UI.modalOpen||DevSys.isOpen)return;
@@ -1791,15 +1802,15 @@ function findInteract(){
   if(G.areas.frost&&!G.iceDone)consider(ICE.x*TILE+18,ICE.y*TILE+18,'دفِّئ الجليد',meltIce,G.ice+'/3 مذاب · يحتاج ثمرة جمر');
   if(G.areas.gloom&&!G.lanterns)consider(LANTERNS.x*TILE+18,LANTERNS.y*TILE+18,'فوانيس الظل',openSimon,'كرّر الضوء');
   const hasTool=G.tools.saw||G.tools.wedge||G.tools.shears;
-  World.decor.forEach(d=>{ if(d.kind!=='tree'&&d.kind!=='rock'&&d.kind!=='flower'&&d.kind!=='bushD')return;
-    const verb=d.kind==='tree'?'اقطع':d.kind==='rock'?'افلق':'قلّم';
-    const tool=d.kind==='tree'?'saw':d.kind==='rock'?'wedge':'shears';
+  World.decor.forEach(d=>{ if(d.kind!=='tree'&&d.kind!=='rock'&&d.kind!=='flower'&&d.kind!=='bushD'&&d.kind!=='spike'&&d.kind!=='shroom')return;
+    const verb=d.kind==='tree'?'اقطع':(d.kind==='rock'||d.kind==='spike')?'افلق':'قلّم';
+    const tool=d.kind==='tree'?'saw':(d.kind==='rock'||d.kind==='spike')?'wedge':'shears';
     consider(d.x,d.y,verb,()=>clearDecor(d),G.tools[tool]?TOOLS[tool].n:'يحتاج '+TOOLS[tool].n); });
   if(!G.stats.clearHint&&!hasTool&&G.started){
     for(let i=0;i<World.decor.length;i++){ const d=World.decor[i];
       if((d.kind==='tree'||d.kind==='rock'||d.kind==='flower')&&dist2(d.x,d.y,P.x,P.y)<44*44){
         G.stats.clearHint=1;
-        toast('ذاك يسد الطريق. تبويب العتاد في البسطة يبيع أدوات لإزالة الأشجار والصخور والأزهار.','good',5600);
+        toast('ذاك يسد الطريق. تبويب العتاد في البسطة يبيع أدوات لإزالة الأشجار والصخور وبلورات الجليد والأزهار والفطر.','good',5600);
         break; } } }
   if(!best){ const bio=World.biomeAt(P.x,P.y);
     if(bio!=='ranch')best={x:P.x,y:P.y,label:'انصب فخًا',fn:trySetTrap,sub:G.trapCount+' فخ متبقٍ · يحتاج طعم'}; }
@@ -2192,7 +2203,7 @@ const UI={
      card.innerHTML=iconBox('#8C5A2F',IC.trap)+'<div class="nm">فخ</div><div class="sub">×'+G.trapCount+' · يُنصب بطعم في البرية</div>';
      grid.appendChild(card); }
    Object.keys(TOOLS).forEach(tk=>{ if(G.tools[tk]){any=true; const card=el('div','card'); card.style.cursor='default';
-     card.innerHTML=iconBox('#B9A99A',IC[tk])+'<div class="nm">'+TOOLS[tk].n+'</div><div class="sub">يزيل '+(tk==='saw'?'الأشجار':tk==='wedge'?'الصخور':'الأزهار والشجيرات')+'</div>';
+     card.innerHTML=iconBox('#B9A99A',IC[tk])+'<div class="nm">'+TOOLS[tk].n+'</div><div class="sub">يزيل '+(tk==='saw'?'الأشجار':tk==='wedge'?'الصخور وبلورات الجليد':'الأزهار والشجيرات والفطر')+'</div>';
      grid.appendChild(card); } });
    if(G.inv.wood){any=true; const card=el('div','card'); card.style.cursor='default';
      card.innerHTML=iconBox('#A9793F','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 8h16M4 12h16M4 16h16"/></svg>')+'<div class="nm">خشب</div><div class="sub">×'+G.inv.wood+' · اقطع أشجارًا للمزيد</div>';
@@ -2399,7 +2410,7 @@ const UI={
    '<div class="hint"><b>الحفظ:</b> كل شيء يُحفظ تلقائيًا على هذا الجهاز. في الإعدادات يمكنك تنزيل بستانك كملف وتحميله على أي جهاز آخر.</div>'+
    '<div class="hint"><b>حكاية الحارس:</b> حياتك تنمو كلما لعبت — ابنِ كوخًا فوق الزريبة، وستتبعك المسافرات والحب والمزرعة وابنٌ بسوقه وابنةٌ بمطبخها. تحدث إلى عائلتك، راقب تغيّر الدار، واتبع الفصول في لوحة المهام.</div>'+
    '<div class="hint"><b>التجارة والطبخ:</b> اقترب من سوق بيبكين لتبيع وتشتري، أو من مطبخ ويلا لتطبخ — الزر الذهبي يفتح كلًا منهما. والتحدث إليهما يفي أيضًا.</div>'+
-   '<div class="hint"><b>طريق مسدود؟</b> اصنع منشار الحارس (أشجار) أو إسفين الفلق (صخور) أو مقصّ التقليم (أزهار وشجيرات) من تبويب العتاد. ما إن تملكها، اقترب من العائق واضغط اقطع / افلق / قلّم — تنفتح الخانة للأبد.</div>'+
+   '<div class="hint"><b>طريق مسدود؟</b> اصنع منشار الحارس (أشجار) أو إسفين الفلق (صخور وبلورات جليد) أو مقصّ التقليم (أزهار وشجيرات وفطر) من تبويب العتاد. ما إن تملكها، اقترب من العائق واضغط اقطع / افلق / قلّم — تنفتح الخانة للأبد.</div>'+
    '<div class="hint">نصائح: الوجبات المطابقة للعنصر تمنح نموًا مضاعفًا · السعادة فوق 60 تفتح نمو التلألؤ · الإعارة تعيد بيبك مع هدية · المزج قد يتحوّل إلى بيبات قزحية.</div>';
    return this.panel('كيف تلعب','دليل الحارس',body);
   },
@@ -2593,7 +2604,7 @@ function freshState(){
    tools:{saw:false,wedge:false,shears:false},
    boat:false,boatX:DOCK.x*TILE+18,boatY:DOCK.y*TILE+20,golem:0,golemWant:null,golemDone:false,ice:0,iceDone:false,lanterns:false,simon:null,
    hasNet:false,netThrow:null,netHint:0,
-   ring:false,vehicle:null,mounted:false,swing:false,
+   ring:false,vehicle:null,mounted:false,swing:false,clearedDecor:[],
    story:{done:[]},home:0,npcs:{rosa:0,son:0,daughter:0},npcList:[],
    farm:{plots:[null,null,null,null,null,null],harvests:0,open:false,giftT:0},
    market:{built:false,sold:0},kitchen:{built:false},meals:{}});
@@ -2638,6 +2649,7 @@ function applySave(d){
   G.hasNet=!!d.hasNet; G.netThrow=null; G.netHint=G.hasNet?1:0;
   G.ring=!!d.ring; G.vehicle=d.vehicle||null; G.mounted=!!d.mounted&&!!G.vehicle; G.swing=!!d.swing;
   G.veh=d.veh||{}; if(G.vehicle&&!G.veh[G.vehicle])G.veh[G.vehicle]=true;
+  G.clearedDecor=Array.isArray(d.clearedDecor)?d.clearedDecor:[];
   G.golem=d.golem||0; G.golemWant=d.golemWant||null; G.golemDone=!!d.golemDone;
   G.ice=d.ice||0; G.iceDone=!!d.iceDone; G.lanterns=!!d.lanterns; G.simon=null;
   G.traps=(Array.isArray(d.traps)?d.traps:[]).filter(t=>t&&((!t.caught)||SP[t.sp])).map(t=>{t.caught=!!t.caught&&!!SP[t.sp];return t;});
@@ -2920,6 +2932,18 @@ function drawBushD(c,x,y){ c.save(); c.translate(x,y);
   c.fillStyle='#4E9A52'; dot(c,0,0,13); dot(c,-10,4,9); dot(c,10,4,9);
   c.fillStyle='#63B568'; dot(c,-4,-5,7);
   c.restore(); }
+function drawSpikeD(c,x,y){ c.save(); c.translate(x,y);
+  c.fillStyle='rgba(0,0,0,.1)'; c.beginPath(); c.ellipse(0,10,12,4,0,0,7); c.fill();
+  c.fillStyle='#DFF4FA'; c.beginPath(); c.moveTo(-10,10); c.lineTo(-3,-16); c.lineTo(3,10); c.closePath(); c.fill();
+  c.fillStyle='#BFE3EE'; c.beginPath(); c.moveTo(2,10); c.lineTo(8,-8); c.lineTo(13,10); c.closePath(); c.fill();
+  c.fillStyle='rgba(255,255,255,.7)'; dot(c,-4,-6,1.6);
+  c.restore(); }
+function drawShroomD(c,x,y){ c.save(); c.translate(x,y);
+  c.fillStyle='rgba(0,0,0,.1)'; c.beginPath(); c.ellipse(0,9,9,3.5,0,0,7); c.fill();
+  c.fillStyle='#E8E0F5'; c.fillRect(-2,-2,4,10);
+  c.fillStyle='#9B6BD6'; c.beginPath(); c.arc(0,-3,9,Math.PI,0); c.fill();
+  c.fillStyle='#E8E0F5'; dot(c,-3,-6,2); dot(c,4,-5,1.6);
+  c.restore(); }
 function drawFlowerD(c,d,t){
   c.save(); c.translate(d.x,d.y); c.rotate(Math.sin(t*1.6+d.sway)*.08);
   c.strokeStyle='#4E9A52'; c.lineWidth=2; c.beginPath(); c.moveTo(0,7); c.lineTo(0,-1); c.stroke();
@@ -3000,6 +3024,8 @@ function render(t){
     if(d.kind==='rock'&&inView(d.x,d.y,48))drawRockD(ctx,d.x,d.y);
     else if(d.kind==='flower'&&inView(d.x,d.y,48))drawFlowerD(ctx,d,t);
     else if(d.kind==='bushD'&&inView(d.x,d.y,48))drawBushD(ctx,d.x,d.y);
+    else if(d.kind==='spike'&&inView(d.x,d.y,48))drawSpikeD(ctx,d.x,d.y);
+    else if(d.kind==='shroom'&&inView(d.x,d.y,48))drawShroomD(ctx,d.x,d.y);
   });
   World.nodes.forEach(nd=>{ if(!inView(nd.x,nd.y,60))return;
     ctx.save(); ctx.translate(nd.x,nd.y);
@@ -3520,6 +3546,17 @@ const DevSys={ active:false,backup:null,isOpen:false,
    const bg=document.getElementById('devBg'),p=document.getElementById('devPanel');
    if(bg)bg.classList.remove('open'); if(p)p.classList.remove('open'); },
 };
+/* إزالة العوائق التي نظّفها الحارس في جلسة سابقة */
+function pruneClearedDecor(){
+  if(!G.clearedDecor||!G.clearedDecor.length)return;
+  const set=new Set(G.clearedDecor);
+  World.decor=World.decor.filter(d=>{
+    const k=Math.floor(d.x/TILE)+','+Math.floor(d.y/TILE);
+    if(!set.has(k))return true;
+    const tx=Math.floor(d.x/TILE),ty=Math.floor(d.y/TILE);
+    if(tx>=0&&ty>=0&&tx<MAP_W&&ty<MAP_H)World.solid[ty*MAP_W+tx]=0;
+    return false; });
+}
 World.gen(); World.bakeGround(); initAtmo();
 ['mossnip','zibbit','puddlefin','frostle'].forEach((sp,i)=>{ const pt=World.spawnPts.meadow[i];
   G.wildPips.push({sp,x:pt[0]*TILE,y:pt[1]*TILE,tx:pt[0]*TILE,ty:pt[1]*TILE,area:'meadow',t:rand(0,9),wt:0,flip:false}); });
@@ -3538,6 +3575,7 @@ $('saveFile').addEventListener('change',e=>{
 });
 const saved=SaveSys.load();
 if(saved)applySave(saved); else freshState();
+pruneClearedDecor();
 rebuildNpcs();
 AudioSys.setVol(G.settings.vol); AudioSys.setMute(G.settings.muted);
 showTitle(); UI.hud(); UI.logBadge(); G.dayT=1.25;
