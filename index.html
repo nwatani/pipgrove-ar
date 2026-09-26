@@ -325,7 +325,7 @@ input[type=range]{width:100%;accent-color:var(--leaf)}
       <span class="chip" id="coinChip"><span class="dot" style="background:#FFC53D"></span><b id="coinVal">0</b></span>
       <span class="chip" id="shardChip" title="شظايا البلور"><span class="dot" style="background:#8FD8F0"></span><b id="shardVal">0</b></span>
       <span class="chip" id="repChip" title="سمعة الحارس"><span class="dot" style="background:#FF7096"></span>مستوى <b id="repVal">1</b></span>
-      <span class="chip" id="penChip" title="البيبات في الحظيرة"><span class="dot" style="background:#63C584"></span><b id="penVal">0/4</b></span>
+      <span class="chip" id="penChip" title="البيبات في الزريبة"><span class="dot" style="background:#63C584"></span><b id="penVal">0/4</b></span>
       <span class="chip" id="buffChip" style="display:none"><span class="dot" style="background:#FF9EC4"></span><b id="buffTxt"></b></span>
     </div>
     <div id="hudBtns">
@@ -502,7 +502,7 @@ const AREAS={
 };
 const AREA_ORDER=['pond','crags','frost','gloom'];
 const UPGRADES={
- pen:{n:'أعشاش دافئة',d:'+2 مكان في حظيرة البيبات.',costs:[120,300,700,1200]},
+ pen:{n:'أعشاش دافئة',d:'+2 مكان في زريبة البيبات.',costs:[120,300,700,1200]},
  inc:{n:'الحاضنة',d:'+1 خانة بيض ومصابيح أدفأ (فقس أسرع).',costs:[200,500,1000]},
  spring:{n:'ينبوع المزج',d:'المستوى 1 يفتح المزج. مستويات أعلى: شحن أسرع وفرص تحوّل أفضل.',costs:[250,600,1200]},
  grove:{n:'سحر البستان',d:'أزهار وفوانيس: تجوع البيبات أبطأ وتبقى أسعد.',costs:[150,400,900]},
@@ -516,10 +516,10 @@ const FIELD={x:1262,y:792,w:108,h:158};
 const CHAPTERS=[
  {id:1,t:'بداية جديدة',d:'فقّس أول بيب تحت السقيفة القديمة.',check:()=>G.stats.hatched>=1,rw:100,msg:'صار البستان أقل وحشة قليلًا.'},
  {id:2,t:'جذور راسخة',d:'اكتشف 4 أنواع وأنجز طلبين من الرحّالة.',check:()=>Helpers.discCount()>=4&&G.stats.requests>=2,rw:150,msg:'خبر المزرعة الصغيرة ينتشر في الطرقات.'},
- {id:3,t:'بيت لائق',d:'ابنِ كوخًا على التلة فوق الحظيرة — 250 عملة، 12 توت شمس، 6 جوز برق.',manual:'home',rw:0,msg:'رفعتَ هذه الجدران بيديك.'},
+ {id:3,t:'بيت لائق',d:'ابنِ كوخًا على التلة فوق الزريبة — 250 عملة، 12 توت شمس، 6 جوز برق.',manual:'home',rw:0,msg:'رفعتَ هذه الجدران بيديك.'},
  {id:4,t:'روح قريبة',d:'مسافرة تدعى روزا لا تكفّ عن إيجاد حجج للمرور قرب المدخنة الدافئة...',check:()=>G.home>=1&&Helpers.repLvl()>=2,spawn:'rosa',rw:0,msg:'تقول إنها تستريح فقط. وهي تستريح منذ أسبوع.'},
  {id:5,t:'قلبان وبستان واحد',d:'روزا تستحق خاتم ألماس (بسطة برامبل ← العتاد)، و6 طلبات منجزة، وبيب بجاذبية 7+.',check:()=>G.npcs.rosa>=1&&G.ring&&G.stats.requests>=6&&G.creatures.some(c=>c.c>=7&&c.stage>=3),rw:300,wed:true,msg:'حضر البستان كله العرس. حتى بيبات الغسق.'},
- {id:6,t:'أول أخدود',d:'تقلب روزا التراب القديم شرق الحظيرة إلى مزرعة، وتصير لكما معًا.',check:()=>G.npcs.rosa>=2,farm:true,rw:0,msg:'ازرع وجبة في التراب وستعتني بها روزا معك.'},
+ {id:6,t:'أول أخدود',d:'تقلب روزا التراب القديم شرق الزريبة إلى مزرعة، وتصير لكما معًا.',check:()=>G.npcs.rosa>=2,farm:true,rw:0,msg:'ازرع وجبة في التراب وستعتني بها روزا معك.'},
  {id:7,t:'خطوات صغيرة',d:'احصد 5 محاصيل وأنجز 10 طلبات — حياة صغيرة تنمو في الكوخ.',check:()=>G.npcs.rosa>=2&&G.farm.harvests>=5&&G.stats.requests>=10,spawn:'son',rw:200,msg:'وصل بيبكين صاخبًا فضوليًا يعدّ العملات بالفعل.'},
  {id:8,t:'بسطة السوق',d:'يحلم بيبكين ببسطة خاصة — ابنِها له بـ 350 عملة و6 جوز صخر.',manual:'market',rw:0,msg:'سوق بيبكين مفتوح للعمل!'},
  {id:9,t:'أغنية الأخت',d:'بع 10 سلع في سوق بيبكين.',check:()=>G.market.built&&G.market.sold>=10,spawn:'daughter',rw:200,msg:'ويلا تدندن وهي تعمل، وخطط المطبخ تدندن معها.'},
@@ -1163,7 +1163,7 @@ function throwNet(w){
       discover(w.sp); AudioSys.capture();
       particles(w.x,w.y-10,'spark',20,'#FFE9A0'); particles(w.x,w.y-10,'heart',8,'#FF9EC4');
       logEvent('أمسك '+SP[w.sp].n+' بريًا بشبكة النجوم!'+(full?' يستريح في الحظيرة.':''));
-      toast('تتوهج الشبكة — أمسكت '+SP[w.sp].n+'!'+(full?' (الحظيرة ممتلئة — يستريح في الاسطبل)':''),'good',5200);
+      toast('تتوهج الشبكة — أمسكت '+SP[w.sp].n+'!'+(full?' (الزريبة ممتلئة — يستريح في الحظيرة)':''),'good',5200);
       UI.hud(); checkMissions();
     } else {
       AudioSys.deny();
@@ -1259,7 +1259,7 @@ function reelFish(){
     const p=makePip(spId,{stage:sp.rar>=2?3:2,barn:full}); G.creatures.push(p);
     G.stats.fished++; discover(spId); AudioSys.quest(); AudioSys.splash();
     particles(f.x,f.y,'spark',22,'#4FC3E8'); particles(f.x,f.y,'heart',8,'#FF9EC4');
-    logEvent('اصطاد '+sp.n+' من البركة!'+(full?' يستريح في الحظيرة.':' قفز سعيدًا إلى الحظيرة.'));
+    logEvent('اصطاد '+sp.n+' من البركة!'+(full?' يستريح في الحظيرة.':' قفز سعيدًا إلى الزريبة.'));
     toast('طشش! اصطدت '+sp.n+'!','good',4600);
     UI.hud(); checkMissions();
   } else {
@@ -1298,8 +1298,8 @@ function openTrap(tr){
   const p=makePip(tr.sp,{stage:sp.rar>=2?3:2,barn:full}); G.creatures.push(p);
   G.stats.trapped++; discover(tr.sp); AudioSys.quest(); AudioSys.thud();
   particles(tr.x,tr.y,'spark',22,'#FFC53D'); particles(tr.x,tr.y,'heart',8,'#FF9EC4');
-  logEvent('دخل '+sp.n+' إلى فخك!'+(full?' يستريح في الحظيرة.':' انضم إلى الحظيرة.'));
-  toast('طَق! قفز '+sp.n+' إلى فخك!'+(full?' (الحظيرة ممتلئة — يستريح في الاسطبل)':''),'good',4600);
+  logEvent('دخل '+sp.n+' إلى فخك!'+(full?' يستريح في الحظيرة.':' انضم إلى الزريبة.'));
+  toast('طَق! قفز '+sp.n+' إلى فخك!'+(full?' (الزريبة ممتلئة — يستريح في الحظيرة)':''),'good',4600);
   UI.hud(); checkMissions();
 }
 function takeBackTrap(tr){
@@ -1349,7 +1349,7 @@ function updatePips(dt){
         const gift=pick(['sunberry','pondplum','emberfruit','frostfig','gloomcap','boltnut','stonenut','pellet']);
         Helpers.addItem(gift,1);
         logEvent('عاد '+SP[p.sp].n+' من الإعارة ومعه '+FOODS[gift].n+' هدية.');
-        toast('عاد '+SP[p.sp].n+' إلى الديار'+(penFull?' (الحظيرة ممتلئة فاستراح في الاسطبل)':'')+' وأحضر لك '+FOODS[gift].n+'!','good'); }
+        toast('عاد '+SP[p.sp].n+' إلى الديار'+(penFull?' (الزريبة ممتلئة فاستراح في الحظيرة)':'')+' وأحضر لك '+FOODS[gift].n+'!','good'); }
       return; }
     p.full=clamp(p.full-dt*(100/300)*hm,0,100);
     p.hap=clamp(p.hap-dt*(p.full<15?(100/170):(100/900))*hm,0,100);
@@ -1518,7 +1518,7 @@ const MISSIONS=[
  {id:'m_adult',t:'ربِّ بيبًا إلى البالغ',d:'البالغون يستطيعون استخدام ينبوع المزج.',r:200,check:()=>Helpers.maxStage()>=3,prog:()=>Helpers.maxStage()>=3?'تم':'بعد'},
  {id:'m_disc8',t:'اكتشف 8 أنواع',d:'بيض الأراضي البعيدة يساعد.',r:250,check:()=>Helpers.discCount()>=8,prog:()=>Math.min(Helpers.discCount(),8)+'/8',give:{egg:'fine'}},
  {id:'m_rare',t:'امتلك بيبًا نادرًا فأعلى',d:'المزج والبيض الفاخر يخفيان النوادر.',r:300,check:()=>Helpers.bestRar()>=2,prog:()=>RARS[Math.max(Helpers.bestRar(),0)].n},
- {id:'m_pen8',t:'وسّع الحظيرة إلى 8 أعشاش',d:'اشترِ أعشاشًا دافئة من البسطة.',r:350,check:()=>Helpers.penCap()>=8,prog:()=>Helpers.penCap()+'/8'},
+ {id:'m_pen8',t:'وسّع الزريبة إلى 8 أعشاش',d:'اشترِ أعشاشًا دافئة من البسطة.',r:350,check:()=>Helpers.penCap()>=8,prog:()=>Helpers.penCap()+'/8'},
  {id:'m_chroma',t:'فقّس بيبًا قزحيًا',d:'المزج يتحوّل أحيانًا. واصل المحاولة!',r:400,check:()=>G.creatures.some(c=>c.chroma)||G.stats.chromaSeen,prog:()=>(G.creatures.some(c=>c.chroma)||G.stats.chromaSeen)?'تم':'لامع؟'},
  {id:'m_rod',t:'اصنع صنارة الصيد',d:'يحتاج برامبل 100 عملة و10 جوز برق و8 توت شمس.',r:100,check:()=>G.gear.rod,prog:()=>G.gear.rod?'صُنعت':'بعد'},
  {id:'m_fish',t:'اصطد بيب ماء',d:'ألقِ من بقعة متلألئة واضغط اسحب حين يعبر المؤشر المنطقة الخضراء.',r:150,check:()=>G.stats.fished>=1,prog:()=>Math.min(G.stats.fished,1)+'/1'},
@@ -1642,7 +1642,7 @@ function buildHome(){ if(G.home>0)return;
   if(G.coins<250||(G.inv.sunberry||0)<12||(G.inv.boltnut||0)<6){toast('الكوخ يحتاج 250 عملة و12 توت شمس و6 جوز برق.','warn');AudioSys.deny();return;}
   G.coins-=250; Helpers.takeItem('sunberry',12); Helpers.takeItem('boltnut',6);
   G.home=1; AudioSys.unlock(); particles(1134,800,'spark',28,'#FFC53D'); untrapPlayer();
-  logEvent('بنى كوخًا لائقًا فوق الحظيرة — بيت أخيرًا.');
+  logEvent('بنى كوخًا لائقًا فوق الزريبة — بيت أخيرًا.');
   toast('بيتٌ، بيتٌ حلو — بُني الكوخ!','good',5200);
   completeChapter(CHAPTERS[2]); UI.hud();
 }
@@ -1864,11 +1864,11 @@ const UI={
  ranchPanel(){ const pen=Helpers.penPips(), barn=G.creatures.filter(c=>c.barn&&!c.trip), trip=G.creatures.filter(c=>c.trip);
    const body=el('div');
    body.appendChild(el('div','tabs',
-     '<button class="tab '+(this.ranchTab==='pen'?'on':'')+'" data-act="rtab" data-t="pen">الحظيرة ('+pen.length+'/'+Helpers.penCap()+')</button>'+
-     '<button class="tab '+(this.ranchTab==='barn'?'on':'')+'" data-act="rtab" data-t="barn">الاسطبل ('+barn.length+')</button>'));
+     '<button class="tab '+(this.ranchTab==='pen'?'on':'')+'" data-act="rtab" data-t="pen">الزريبة ('+pen.length+'/'+Helpers.penCap()+')</button>'+
+     '<button class="tab '+(this.ranchTab==='barn'?'on':'')+'" data-act="rtab" data-t="barn">الحظيرة ('+barn.length+')</button>'));
    const grid=el('div','grid3');
    const list=this.ranchTab==='pen'?pen:barn;
-   if(!list.length)grid.appendChild(el('div','hint',this.ranchTab==='pen'?'لا بيبات هنا بعد. فقّس بيضة عند الحاضنة!':'الاسطبل فارغ. انقل البيبات من بطاقة تفاصيلها.'));
+   if(!list.length)grid.appendChild(el('div','hint',this.ranchTab==='pen'?'لا بيبات هنا بعد. فقّس بيضة عند الحاضنة!':'الحظيرة فارغة. انقل البيبات من بطاقة تفاصيلها.'));
    list.forEach(p=>{ const sp=SP[p.sp];
      const card=el('div','card'); card.dataset.act='detail'; card.dataset.uid=p.uid;
      const cv=el('canvas'); cv.width=120;cv.height=120; pipPortrait(cv,p.sp,p.stage,p.chroma); card.appendChild(cv);
@@ -1880,7 +1880,7 @@ const UI={
      grid.appendChild(card); });
    body.appendChild(grid);
    if(trip.length)body.appendChild(el('div','hint',trip.length+' بيب مسافر مع رحّالة — سيعودون قريبًا بهدايا.'));
-   return this.panel('بيباتك','الحظيرة والاسطبل',body,'<span class="chip">بيض في السلة: <b>'+G.eggs.length+'</b></span><button class="btn gold" data-act="open" data-panel="inc">افتح الحاضنة</button>');
+   return this.panel('بيباتك','الزريبة والحظيرة',body,'<span class="chip">بيض في السلة: <b>'+G.eggs.length+'</b></span><button class="btn gold" data-act="open" data-panel="inc">افتح الحاضنة</button>');
  },
  detail(p){ this.detailPip=p;
    this.close(); this.current='detail'; this.modalOpen=true; $('modalRoot').classList.add('open');
@@ -1898,7 +1898,7 @@ const UI={
    body.appendChild(bars); this.renderDetailBars(bars,p);
    const foot='<button class="btn" data-act="feedpick" data-uid="'+p.uid+'">'+IC.heart.replace('currentColor','#fff')+' أطعم</button>'+
      '<button class="btn pinky" data-act="pet" data-uid="'+p.uid+'">داعب</button>'+
-     '<button class="btn ghost" data-act="swap" data-uid="'+p.uid+'">'+(p.barn?'انقل للحظيرة':'انقل للاسطبل')+'</button>';
+     '<button class="btn ghost" data-act="swap" data-uid="'+p.uid+'">'+(p.barn?'انقل للزريبة':'انقل للحظيرة')+'</button>';
    const node=this.panel('بيب',null,body,foot); $('modalRoot').appendChild(node);
    this._detailRaf=true;
    const anim=()=>{ if(!this._detailRaf||this.current!=='detail')return;
@@ -2391,12 +2391,12 @@ const UI={
    '<div class="kv"><span>التفاعل</span><span>زر E أو الزر الذهبي الكبير</span></div>'+
    '<div class="kv"><span>إغلاق اللوحات</span><span>Esc أو ×</span></div>'+
    '<div class="hint">الحلقة: استكشف → اجمع الوجبات والبيض → فقّس البيبات → أطعمها وداعبها → امزج البالغين عند الينبوع → طابِق البيبات مع الرحّالة → اكسب العملات → افتح أراضٍ جديدة. البيبات المتلألئة (المرحلة 4) تنسج بيض القزح!</div>'+
-   '<div class="hint"><b>ملء الحظيرة:</b> 1) فقّس البيض في الحاضنة. 2) <b>شبكة النجوم</b> — أثر مدفون في مكان ما بأقصى زوايا صخور الجمر. اعثر عليها ثم اقترب من بيبات البر البرية وارمِ الشبكة لإمساكها فورًا (البيبات الأندر أصعب إمساكًا). 3) <b>الفخاخ</b>: انصب واحدًا بطعم وعد لاحقًا. 4) <b>الصيد</b> لبيبات الماء بصنارة القارب. بيبات الماء لا تُمسك بالشبكة أبدًا — بالصيد فقط.</div>'+
+   '<div class="hint"><b>ملء الزريبة:</b> 1) فقّس البيض في الحاضنة. 2) <b>شبكة النجوم</b> — أثر مدفون في مكان ما بأقصى زوايا صخور الجمر. اعثر عليها ثم اقترب من بيبات البر البرية وارمِ الشبكة لإمساكها فورًا (البيبات الأندر أصعب إمساكًا). 3) <b>الفخاخ</b>: انصب واحدًا بطعم وعد لاحقًا. 4) <b>الصيد</b> لبيبات الماء بصنارة القارب. بيبات الماء لا تُمسك بالشبكة أبدًا — بالصيد فقط.</div>'+
    '<div class="hint"><b>أراضٍ جديدة:</b> اتبع دربًا ترابيًا إلى بوابة رسوم حجرية. لكل بوابة لافتة معلقة تُظهر وجهتها ورسومها — اقترب واضغط افتح (قد يلزم مستوى حارس)، أو افتح الأراضي من لوحة الخريطة.</div>'+
-   '<div class="hint"><b>الحظيرة</b> المبنى الأحمر الكبير في مزرعتك. تستريح البيبات هناك حين تمتلئ الحظيرة؛ انقل البيبات بين الحظيرة والاسطبل من بطاقتها أو بالمشي إلى باب الحظيرة.</div>'+
+   '<div class="hint"><b>الحظيرة</b> المبنى الأحمر الكبير في مزرعتك. تستريح البيبات هناك حين تمتلئ الزريبة؛ انقل البيبات بين الزريبة والحظيرة من بطاقتها أو بالمشي إلى باب الحظيرة.</div>'+
    '<div class="hint"><b>اليوميات</b> (أيقونة الكتاب أعلى الشاشة) تدوّن كل فقس واكتشاف ومكافأة وفتح مع وقت حدوثه — مفيدة حين لا تراقب الشاشة.</div>'+
    '<div class="hint"><b>الحفظ:</b> كل شيء يُحفظ تلقائيًا على هذا الجهاز. في الإعدادات يمكنك تنزيل بستانك كملف وتحميله على أي جهاز آخر.</div>'+
-   '<div class="hint"><b>حكاية الحارس:</b> حياتك تنمو كلما لعبت — ابنِ كوخًا فوق الحظيرة، وستتبعك المسافرات والحب والمزرعة وابنٌ بسوقه وابنةٌ بمطبخها. تحدث إلى عائلتك، راقب تغيّر الدار، واتبع الفصول في لوحة المهام.</div>'+
+   '<div class="hint"><b>حكاية الحارس:</b> حياتك تنمو كلما لعبت — ابنِ كوخًا فوق الزريبة، وستتبعك المسافرات والحب والمزرعة وابنٌ بسوقه وابنةٌ بمطبخها. تحدث إلى عائلتك، راقب تغيّر الدار، واتبع الفصول في لوحة المهام.</div>'+
    '<div class="hint"><b>التجارة والطبخ:</b> اقترب من سوق بيبكين لتبيع وتشتري، أو من مطبخ ويلا لتطبخ — الزر الذهبي يفتح كلًا منهما. والتحدث إليهما يفي أيضًا.</div>'+
    '<div class="hint"><b>طريق مسدود؟</b> اصنع منشار الحارس (أشجار) أو إسفين الفلق (صخور) أو مقصّ التقليم (أزهار وشجيرات) من تبويب العتاد. ما إن تملكها، اقترب من العائق واضغط اقطع / افلق / قلّم — تنفتح الخانة للأبد.</div>'+
    '<div class="hint">نصائح: الوجبات المطابقة للعنصر تمنح نموًا مضاعفًا · السعادة فوق 60 تفتح نمو التلألؤ · الإعارة تعيد بيبك مع هدية · المزج قد يتحوّل إلى بيبات قزحية.</div>';
@@ -2425,8 +2425,8 @@ document.addEventListener('click',e=>{
    case 'pet': { const p=G.creatures.find(c=>c.uid==t.dataset.uid); if(p)petPip(p); break; }
    case 'swap': { const p=G.creatures.find(c=>c.uid==t.dataset.uid); if(p){
        if(p.trip){toast(SP[p.sp].n+' مسافر مع رحّالة حاليًا.','warn');return;}
-       if(p.barn){ if(Helpers.penPips().length>=Helpers.penCap()){toast('الحظيرة ممتلئة! رقِّ الأعشاش الدافئة أو انقل أحدهم للاسطبل.','warn');return;} p.barn=false; const pr=World.penRect; p.x=rand(pr.x+24,pr.x+pr.w-24); p.y=rand(pr.y+20,pr.y+pr.h-16); toast('هرول '+SP[p.sp].n+' إلى الحظيرة.','good'); }
-       else { p.barn=true; toast(SP[p.sp].n+' يستريح في الاسطبل.',''); }
+       if(p.barn){ if(Helpers.penPips().length>=Helpers.penCap()){toast('الزريبة ممتلئة! رقِّ الأعشاش الدافئة أو انقل أحدهم للحظيرة.','warn');return;} p.barn=false; const pr=World.penRect; p.x=rand(pr.x+24,pr.x+pr.w-24); p.y=rand(pr.y+20,pr.y+pr.h-16); toast('هرول '+SP[p.sp].n+' إلى الزريبة.','good'); }
+       else { p.barn=true; toast(SP[p.sp].n+' يستريح في الحظيرة.',''); }
        AudioSys.pop(); UI.detail(p); UI.hud(); } break; }
    case 'placeegg': { const i=+t.dataset.i; if(!G.eggs.length){toast('لا بيض في سلتك. جده في البرية!','warn');return;}
      placeEggInInc(i); break; }
@@ -3219,7 +3219,7 @@ function render(t){
   const pr=World.penRect; ctx.strokeStyle='#C99A5F'; ctx.lineWidth=4;
   ctx.setLineDash([14,10]); ctx.strokeRect(pr.x-6,pr.y-6,pr.w+12,pr.h+12); ctx.setLineDash([]);
   ctx.fillStyle='#8C5A2F'; [[pr.x-6,pr.y-6],[pr.x+pr.w+6,pr.y-6],[pr.x-6,pr.y+pr.h+6],[pr.x+pr.w+6,pr.y+pr.h+6]].forEach(p2=>{ ctx.beginPath(); ctx.arc(p2[0],p2[1],5,0,7); ctx.fill(); });
-  bLabels.push({x:pr.x+pr.w/2,y:pr.y-16,text:'حظيرة البيبات'});
+  bLabels.push({x:pr.x+pr.w/2,y:pr.y-16,text:'زريبة البيبات'});
   const drawList=[];
   World.decor.forEach(d=>{ if(d.kind!=='tree'||!inView(d.x,d.y,100))return;
     drawList.push({y:d.y,fn:()=>drawTree(ctx,d,t)}); });
