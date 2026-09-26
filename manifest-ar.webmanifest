@@ -2,7 +2,7 @@
   "name": "بيبغروف — مزرعة الكائنات",
   "short_name": "بيبغروف",
   "description": "مغامرة دافئة لجمع الكائنات. فقّس وربِّ وامزج وصادِق بيبات لطيفة، ابنِ دارك وعِش حكاية الحارس.",
-  "start_url": "./index-ar.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
